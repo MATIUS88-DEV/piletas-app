@@ -1,0 +1,39 @@
+// schema.prisma — Modelos base de la app de piletas
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Se carga desde .env
+}
+
+// Modelo de Socios
+model Socio {
+  nrsocio   String   @id
+  nombre    String
+  apellido  String
+  dni       String   @unique
+  tipo      String?
+  estado    String?  @default("Activo")
+  cuotas    Cuota[]
+}
+
+// Modelo de Cuotas
+model Cuota {
+  id        Int      @id @default(autoincrement())
+  mes       String
+  año       String
+  monto     Float
+  nrsocio   String
+  socio     Socio    @relation(fields: [nrsocio], references: [nrsocio])
+}
+
+// Modelo de Usuario (para login)
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  tipo      String
+}

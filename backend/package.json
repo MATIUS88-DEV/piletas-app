@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+  "dev": "npx dotenv -e .env.development nodemon src/index.js",
+  "start": "npx dotenv -e .env.production node src/index.js",
+  "prisma:generate:dev": "npx dotenv -e .env.development prisma generate",
+  "prisma:generate:prod": "npx dotenv -e .env.production prisma generate",
+  "prisma:push:dev": "npx dotenv -e .env.development prisma db push",  "prisma:push:prod": "npx dotenv -e .env.production prisma db push",
+  "prisma:studio:dev": "npx dotenv -e .env.development prisma studio",
+  "prisma:studio:prod": "npx dotenv -e .env.production prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "prisma": "^6.19.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "dotenv-cli": "^11.0.0",
+    "nodemon": "^3.1.11"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
