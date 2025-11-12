@@ -1,0 +1,19 @@
+# Archivos de entorno
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+coverage/
+
+# Prisma
+prisma/generated/
