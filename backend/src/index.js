@@ -21,14 +21,9 @@ if (!process.env.RENDER) {
     process.env.NODE_ENV === "production"
       ? path.join(__dirname, "../.env.production")
       : path.join(__dirname, "../.env.development");
-  const result = dotenv.config({ path: envPath });
+  dotenv.config({ path: envPath });
 } else {
-  const result = dotenv.config(); // Render ya las tiene cargadas
-}
-
-if (result.error) {
-  console.error("❌ Error cargando archivo .env:", result.error);
-  process.exit(1);
+  dotenv.config(); // Render ya las tiene cargadas
 }
 
 console.log(`✅ Entorno: ${process.env.NODE_ENV || "development"}`);
