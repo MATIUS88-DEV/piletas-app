@@ -16,13 +16,15 @@ const __dirname = path.dirname(__filename);
 
 // --- Cargar dotenv antes de importar Prisma ---
 // Selecciona el .env según NODE_ENV
-const envPath =
-  process.env.NODE_ENV === "production"
-    ? path.join(__dirname, "../.env.production")
-    : path.join(__dirname, "../.env.development");
-
-// ⚠️ dotenv debe ejecutarse antes de importar Prisma
-const result = dotenv.config({ path: envPath });
+if (!process.env.RENDER) {
+  const envPath =
+    process.env.NODE_ENV === "production"
+      ? path.join(__dirname, "../.env.production")
+      : path.join(__dirname, "../.env.development");
+  const result = dotenv.config({ path: envPath });
+} else {
+  const result = dotenv.config(); // Render ya las tiene cargadas
+}
 
 if (result.error) {
   console.error("❌ Error cargando archivo .env:", result.error);
