@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
   "dev": "npx dotenv -e .env.development nodemon src/index.js",
-  "start": "npx dotenv -e .env.production node src/index.js",
   "prisma:generate:dev": "npx dotenv -e .env.development prisma generate",
-  "prisma:generate:prod": "npx dotenv -e .env.production prisma generate",
-  "prisma:push:dev": "npx dotenv -e .env.development prisma db push",  "prisma:push:prod": "npx dotenv -e .env.production prisma db push",
+  "prisma:push:dev": "npx dotenv -e .env.development prisma db push",
   "prisma:studio:dev": "npx dotenv -e .env.development prisma studio",
-  "prisma:studio:prod": "npx dotenv -e .env.production prisma studio"
+  "start": "node src/index.js",
+  "prisma:generate:prod": "prisma generate",
+  "prisma:push:prod": "prisma db push",
+  "prisma:studio:prod": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
