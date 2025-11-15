@@ -3,6 +3,7 @@
  * Importa la lógica desde el controlador.
  */
 import express from "express";
+import { authMiddleware } from "../middleware/auth.js";
 import {
   getSocios,
   getSocioById,
@@ -14,18 +15,18 @@ import {
 const router = express.Router();
 
 // GET /api/socios → listar socios con filtros opcionales
-router.get("/", getSocios);
+router.get("/", authMiddleware, getSocios);
 
 // GET /api/socios/:nrsocio → obtener un socio por ID
-router.get("/:nrsocio", getSocioById);
+router.get("/:nrsocio",authMiddleware, getSocioById);
 
 // POST /api/socios → crear nuevo socio
-router.post("/", createSocio);
+router.post("/",authMiddleware, createSocio);
 
 // PUT /api/socios/:nrsocio → actualizar socio
-router.put("/:nrsocio", updateSocio);
+router.put("/:nrsocio",authMiddleware, updateSocio);
 
 // PATCH /api/socios/:nrsocio/estado → baja lógica
-router.patch("/:nrsocio/estado", softDeleteSocio);
+router.patch("/:nrsocio/estado",authMiddleware, softDeleteSocio);
 
 export default router;

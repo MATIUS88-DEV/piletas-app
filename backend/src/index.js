@@ -1,21 +1,20 @@
 /**
- * index.js — punto de entrada del backend.
- * Inicia Express, carga variables de entorno y conecta Prisma.
- * Versión corregida para que Prisma lea DATABASE_URL correctamente.
+ * index.js — versión con CORS forzado compatible con Codespaces.
+ * Responde correctamente a preflight y evita bloqueos.
  */
 
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import authRouter from "./routes/auth.js";
+import sociosRouter from "./routes/socios.js";
 
-// --- Configuración de __dirname y path (para ES Modules) ---
+// --- Configuración de __dirname ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// --- Cargar dotenv antes de importar Prisma ---
-// Selecciona el .env según NODE_ENV
+// --- Cargar dotenv ---
 if (!process.env.RENDER) {
   const envPath =
     process.env.NODE_ENV === "production"
@@ -23,30 +22,60 @@ if (!process.env.RENDER) {
       : path.join(__dirname, "../.env.development");
   dotenv.config({ path: envPath });
 } else {
-  dotenv.config(); // Render ya las tiene cargadas
+  dotenv.config();
 }
 
-console.log(`✅ Entorno: ${process.env.NODE_ENV || "development"}`);
-console.log(`📦 DATABASE_URL: ${process.env.DATABASE_URL ? "Cargada" : "NO CARGADA"}`);
-
-// --- Importar Prisma después de cargar dotenv ---
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// --- Inicializar Express ---
 const app = express();
-app.use(cors());
 app.use(express.json());
+console.log("DATABASE_URL actual:", process.env.DATABASE_URL);
+// 🧩 CORS forzado (antes de rutas)
+// --- CORS FIX TOTAL PARA FIREFOX + GITHUB CODESPACES ---
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  const allowedOrigins = [
+    "https://special-zebra-x5gjvr975jqr3j9g-3000.app.github.dev",
+    "http://localhost:3000",
+    "http://localhost:5173",
+  ];
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  } else {
+    res.header("Access-Control-Allow-Origin", "*");
+  }
+
+  res.header("Vary", "Origin");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
+  next();
+});
+
+
+// --- Debug de origen ---
+app.use((req, _, next) => {
+  console.log(`🌐 ${req.method} ${req.url} desde ${req.headers.origin || "N/A"}`);
+  next();
+});
 
 // --- Rutas ---
-import sociosRouter from "./routes/socios.js";
+app.use("/api/auth", authRouter);
 app.use("/api/socios", sociosRouter);
 
-// --- Endpoint base ---
+// --- Root ---
 app.get("/", (req, res) => {
   res.json({ message: "API funcionando", env: process.env.NODE_ENV });
 });
 
-// --- Levantar servidor ---
+// --- Servidor ---
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Servidor en puerto ${PORT}`));
