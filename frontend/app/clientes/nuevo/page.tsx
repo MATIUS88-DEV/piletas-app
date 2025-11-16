@@ -5,12 +5,12 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 
-// ShadCN UI
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 export default function AltaCliente() {
   const ready = useAuthGuard();
@@ -25,16 +25,16 @@ export default function AltaCliente() {
     telefono: "",
     correo: "",
     tipo: "",
-    estado: "Activo"
+    estado: "Activo",
+    aptoMedico: false
   });
 
   const [errores, setErrores] = useState({});
 
   if (!ready) return <p className="p-8 text-gray-500">Cargando...</p>;
 
-  // VALIDACIONES
   const validar = () => {
-    let e = {};
+    let e: any = {};
 
     if (!/^[0-9]+$/.test(data.nrsocio)) e.nrsocio = "Debe ser numérico";
     if (!/^[0-9]+$/.test(data.dni)) e.dni = "Debe ser numérico";
@@ -53,11 +53,13 @@ export default function AltaCliente() {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post(`${apiUrl}/socios`, data, {
+
+      const res = await axios.post(`${apiUrl}/socios`, data, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert("Socio creado con éxito");
-      router.push("/clientes/listado");
+
+      const creado = res.data;
+      router.push(`/clientes/detalle/${creado.nrsocio}`);
     } catch (err) {
       console.error(err);
       alert("Error al crear socio");
@@ -73,7 +75,6 @@ export default function AltaCliente() {
         </CardHeader>
 
         <CardContent>
-          {/* GRID 2 COLUMNAS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* CAMPOS DE TEXTO */}
@@ -93,18 +94,14 @@ export default function AltaCliente() {
                   onChange={(e) => setData({ ...data, [key]: e.target.value })}
                   className={errores[key] ? "border-red-500" : ""}
                 />
-                {errores[key] && (
-                  <p className="text-red-500 text-sm">{errores[key]}</p>
-                )}
+                {errores[key] && <p className="text-red-500 text-sm">{errores[key]}</p>}
               </div>
             ))}
 
             {/* SELECT TIPO */}
             <div className="flex flex-col space-y-2">
               <Label>Tipo</Label>
-              <Select
-                onValueChange={(value) => setData({ ...data, tipo: value })}
-              >
+              <Select onValueChange={(value) => setData({ ...data, tipo: value })}>
                 <SelectTrigger className={errores.tipo ? "border-red-500" : ""}>
                   <SelectValue placeholder="Seleccionar tipo..." />
                 </SelectTrigger>
@@ -113,9 +110,16 @@ export default function AltaCliente() {
                   <SelectItem value="Clases">Clases</SelectItem>
                 </SelectContent>
               </Select>
-              {errores.tipo && (
-                <p className="text-red-500 text-sm">{errores.tipo}</p>
-              )}
+              {errores.tipo && <p className="text-red-500 text-sm">{errores.tipo}</p>}
+            </div>
+
+            {/* SWITCH APTO MÉDICO */}
+            <div className="flex flex-col space-y-2">
+              <Label>Apto Médico</Label>
+              <Switch
+                checked={data.aptoMedico}
+                onCheckedChange={(v) => setData({ ...data, aptoMedico: v })}
+              />
             </div>
 
           </div>

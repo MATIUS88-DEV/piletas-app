@@ -5,11 +5,6 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 
-// shadcn/ui
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
 export default function BuscarCliente() {
   const router = useRouter();
   const ready = useAuthGuard();
@@ -25,7 +20,11 @@ export default function BuscarCliente() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   if (!ready) {
-    return <p className="p-8 text-gray-500">Cargando...</p>;
+    return (
+      <main className="p-8">
+        <p className="text-gray-600">Cargando...</p>
+      </main>
+    );
   }
 
   const buscar = async () => {
@@ -40,61 +39,70 @@ export default function BuscarCliente() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setResultados(res.data);
+      const data = res.data;
+      setResultados(data);
+
+      // 👉 Navegación automática si hay un único resultado
+      if (data.length === 1) {
+        const socio = data[0];
+        router.push(`/clientes/detalle/${socio.nrsocio}`);
+      }
+
     } catch (err) {
+      console.error("Error al buscar:", err);
       alert("Error al buscar clientes");
-      console.error(err);
     }
   };
 
   return (
-    <main className="p-8 space-y-6 bg-gray-100 min-h-screen">
+    <main className="p-8 space-y-6">
       <h1 className="text-2xl font-bold">Buscar Cliente</h1>
 
-      <Card className="p-6 max-w-lg">
-        <CardHeader>
-          <CardTitle>Filtros de Búsqueda</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {["nrsocio", "nombre", "apellido", "dni"].map((campo) => (
-            <Input
-              key={campo}
-              placeholder={campo}
-              value={filtro[campo]}
-              onChange={(e) =>
-                setFiltro({ ...filtro, [campo]: e.target.value })
-              }
-            />
+      <div className="space-y-2 mb-4">
+        {["nrsocio", "nombre", "apellido", "dni"].map((campo) => (
+          <input
+            key={campo}
+            type="text"
+            placeholder={campo}
+            value={filtro[campo]}
+            onChange={(e) =>
+              setFiltro({ ...filtro, [campo]: e.target.value })
+            }
+            className="border p-2 rounded w-full"
+          />
+        ))}
+      </div>
+
+      <button
+        onClick={buscar}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Buscar
+      </button>
+
+      <ul className="mt-4 space-y-2">
+        {resultados.length > 1 &&
+          resultados.map((s) => (
+            <li
+              key={s.nrsocio}
+              onClick={() => router.push(`/clientes/detalle/${s.nrsocio}`)}  
+              className="p-2 bg-white rounded shadow cursor-pointer hover:bg-gray-50 transition"
+            >
+              {s.apellido}, {s.nombre} — {s.estado}
+            </li>
           ))}
 
-          <Button onClick={buscar} className="w-full">
-            Buscar
-          </Button>
-        </CardContent>
-      </Card>
+        {resultados.length === 0 && (
+          <p className="text-gray-500">No hay resultados.</p>
+        )}
+      </ul>
 
-      <Card className="p-6 max-w-xl">
-        <CardHeader>
-          <CardTitle>Resultados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {resultados.length === 0 ? (
-            <p className="text-gray-500">No hay resultados aún.</p>
-          ) : (
-            <ul className="space-y-2">
-              {resultados.map((s) => (
-                <li key={s.nrsocio} className="p-3 bg-white rounded shadow">
-                  {s.apellido}, {s.nombre} — {s.estado}
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
-
-      <Button variant="secondary" onClick={() => router.push("/dashboard")}>
+      <button
+        onClick={() => router.push("/dashboard")}
+        className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+      >
         Volver al menú
-      </Button>
+      </button>
     </main>
   );
 }
